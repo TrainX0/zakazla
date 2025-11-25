@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI Video — Panel</title>
+
+<style>
+  :root{ --bg1:#04111a; --card:#071426; --accent1:#8b5cf6; --accent2:#06b6d4; --muted:rgba(255,255,255,0.7)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,var(--bg1),#041a2a);color:#eaf2ff;min-height:100vh}
+  header{padding:18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.03)}
+  header h2{margin:0;font-size:18px}
+  .wrap{max-width:1100px;margin:22px auto;padding:12px}
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  .btn{padding:10px 12px;border-radius:10px;border:0;cursor:pointer;background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#fff;font-weight:700}
+  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+  label{display:block;margin:8px 0;font-size:13px;color:var(--muted)}
+  input, textarea, select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:#eaf2ff}
+  textarea{min-height:100px}
+  .orders-list .order{padding:10px;border-radius:10px;background:rgba(0,0,0,0.12);margin-bottom:8px}
+  .small{font-size:13px}
+  .muted{opacity:.85}
+  .chat-area{display:flex;flex-direction:column;height:380px}
+  .messages{flex:1;overflow:auto;padding:8px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+  .msg{padding:6px;border-radius:8px;margin:6px 0;background:rgba(255,255,255,0.02)}
+  footer{margin-top:14px;text-align:center;color:rgba(255,255,255,0.6);font-size:13px}
+
+  @media(max-width:980px){
+    .grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h2>AI Video — Панель</h2>
+  <div>
+    <span id="who" class="muted small">...</span>
+    <button class="btn ghost" id="logoutBtn" style="margin-left:10px">Выйти</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="notAuth" class="card" style="display:none">
+    <h3>Не авторизован</h3>
+    <p>Пожалуйста, войдите через <a href="/">страницу входа</a>.</p>
+  </div>
+
+  <div id="mainUI" style="display:none">
+    <div class="grid">
+      <!-- main column -->
+      <div>
+        <div class="card" id="mainMenu">
+          <h3 id="greet">Привет</h3>
+          <p class="muted">Здесь ты можешь создать заказ или писать администратору.</p>
+
+          <!-- client order form -->
+          <div id="clientArea">
+            <h4>Создать заказ</h4>
+            <label>Тип заказа</label>
+            <select id="orderType">
+              <option value="video">Видео</option>
+              <option value="photo">Фото</option>
+              <option value="other">Другое</option>
+            </select>
+
+            <label>Описание</label>
+            <textarea id="orderDesc" placeholder="Кратко опиши задачу"></textarea>
+
+            <label>Доп. ссылка / примеры (опционально)</label>
+            <input id="orderRef" placeholder="Ссылка на пример или комментарий" />
+
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn" id="createOrderBtn">Отправить заказ</button>
+              <button class="btn ghost" id="refreshOrdersBtn">Обновить</button>
+            </div>
+
+            <div id="createResult" class="small" style="margin-top:8px"></div>
+          </div>
+
+          <!-- admin quick actions -->
+          <div id="adminQuick" style="display:none;margin-top:16px">
+            <h4>Админ: быстрые действия</h4>
+            <div style="display:flex;gap:8px">
+              <button class="btn" id="showAllOrdersBtn">Показать все заказы</button>
+              <button class="btn ghost" id="exportBtn">Экспорт orders.json</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>Список заказов</h4>
+          <div id="orders" class="orders-list">
+            <div class="small muted">Загрузите заказы...</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- side column -->
+      <div>
+        <div class="card">
+          <h4>Чат & сообщения</h4>
+          <div class="chat-area">
+            <div id="messages" class="messages"></div>
+            <div style="margin-top:8px">
+              <input id="chatName" placeholder="Имя (по желанию)" />
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <input id="chatText" placeholder="Сообщение..." />
+                <button class="btn" id="sendMsgBtn">Отправить</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>Информация</h4>
+          <p class="small muted">Админ: используй логин <strong>Bobur2012.12</strong></p>
+          <p class="small muted">Здесь сохраняются заявки локально в `orders.json` и пользователи в `users.json`.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer>AI Video —  panel</footer>
+  </div>
+</div>
+
+<script>
+/* panel.html JS
+   - получает текущую сессию /who (GET /who)
+   - показывает clientArea или adminQuick в зависимости от role
+   - позволяет создавать заказ (POST /api/orders)
+   - получает заказы (GET /api/orders)
+   - чат: GET /api/messages, POST /api/messages
+   - logout -> /logout
+*/
+
+async function api(path, opts = {}) {
+  opts.headers = opts.headers || {};
+  if (!opts.headers['Content-Type'] && !(opts.body instanceof FormData)) opts.headers['Content-Type'] = 'application/json';
+  const res = await fetch(path, opts);
+  return res.json();
+}
+
+const whoEl = document.getElementById('who');
+const notAuthEl = document.getElementById('notAuth');
+const mainUI = document.getElementById('mainUI');
+const greet = document.getElementById('greet');
+const clientArea = document.getElementById('clientArea');
+const adminQuick = document.getElementById('adminQuick');
+const ordersEl = document.getElementById('orders');
+const messagesEl = document.getElementById('messages');
+
+let session = null;
+
+async function loadSession() {
+  const j = await api('/who');
+  if (!j || !j.logged) {
+    notAuthEl.style.display = 'block';
+    mainUI.style.display = 'none';
+    return;
+  }
+  session = j;
+  notAuthEl.style.display = 'none';
+  mainUI.style.display = 'block';
+  whoEl.textContent = `${j.username} (${j.role})`;
+  greet.textContent = `Привет, ${j.username}!`;
+  if (j.role === 'admin') {
+    adminQuick.style.display = 'block';
+    clientArea.style.display = 'none';
+  } else {
+    adminQuick.style.display = 'none';
+    clientArea.style.display = 'block';
+  }
+  await loadOrders();
+  await loadMessages();
+}
+
+document.getElementById('logoutBtn').onclick = async () => {
+  await api('/logout', { method: 'POST' });
+  window.location.href = '/';
+};
+
+// create order
+document.getElementById('createOrderBtn').onclick = async () => {
+  const type = document.getElementById('orderType').value;
+  const desc = document.getElementById('orderDesc').value.trim();
+  const ref = document.getElementById('orderRef').value.trim();
+  if (!desc) { alert('Опиши задачу'); return; }
+  const j = await api('/api/orders', { method: 'POST', body: JSON.stringify({ type, description: desc, reference: ref }) });
+  const resEl = document.getElementById('createResult');
+  if (j && j.ok) {
+    resEl.textContent = 'Заказ создан. ID: ' + j.id;
+    document.getElementById('orderDesc').value = '';
+    document.getElementById('orderRef').value = '';
+    loadOrders();
+  } else {
+    resEl.textContent = 'Ошибка: ' + (j.error || '...');
+  }
+};
+
+// refresh orders
+document.getElementById('refreshOrdersBtn').onclick = loadOrders;
+document.getElementById('showAllOrdersBtn').onclick = loadOrders;
+document.getElementById('exportBtn').onclick = async () => {
+  const j = await api('/api/orders');
+  if (j && j.ok) {
+    const blob = new Blob([JSON.stringify(j.orders, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'orders_export.json'; a.click();
+  } else alert('Ошибка экспорта');
+};
+
+// load orders (admin gets all, user only own)
+async function loadOrders() {
+  ordersEl.innerHTML = '<div class="small muted">Загрузка...</div>';
+  const j = await api('/api/orders');
+  if (!j || !j.ok) { ordersEl.innerHTML = '<div class="small muted">Ошибка загрузки</div>'; return; }
+  const rows = j.orders || [];
+  if (rows.length === 0) { ordersEl.innerHTML = '<div class="small muted">Заказов нет</div>'; return; }
+  ordersEl.innerHTML = '';
+  rows.forEach(o => {
+    const div = document.createElement('div');
+    div.className = 'order';
+    const who = o.username ? ` — ${o.username}` : '';
+    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>#${o.id} ${o.type}</strong><div class="small muted">${o.created_at}</div></div>
+        <div class="small muted">Статус: ${o.status}</div>
+      </div>
+      <div style="margin-top:8px">${escapeHtml(o.description || '')}</div>
+      ${ o.reference ? `<div style="margin-top:8px" class="small muted">Ref: ${escapeHtml(o.reference)}</div>` : '' }
+      ${ session && session.role === 'admin' ? `<div style="margin-top:8px"><button class="btn small" onclick="setStatus(${o.id},'in_progress')">В работе</button> <button class="btn ghost small" onclick="setStatus(${o.id},'done')">Готово</button></div>` : '' }`;
+    ordersEl.appendChild(div);
+  });
+}
+
+// set status (admin)
+async function setStatus(id, status) {
+  const j = await api('/api/orders/' + id + '/status', { method:'POST', body: JSON.stringify({ status }) });
+  if (j && j.ok) loadOrders(); else alert('Ошибка');
+}
+
+// chat
+document.getElementById('sendMsgBtn').onclick = sendMessage;
+async function loadMessages() {
+  const j = await api('/api/messages');
+  if (!j || !j.ok) return;
+  messagesEl.innerHTML = '';
+  j.messages.forEach(m => {
+    const d = document.createElement('div'); d.className='msg';
+    d.textContent = `${m.username || 'Гость'}: ${m.message}`;
+    messagesEl.appendChild(d);
+  });
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+async function sendMessage() {
+  const name = document.getElementById('chatName').value.trim() || (session && session.username) || 'Гость';
+  const text = document.getElementById('chatText').value.trim();
+  if (!text) return;
+  const j = await api('/api/messages', { method:'POST', body: JSON.stringify({ username: name, message: text }) });
+  if (j && j.ok) {
+    document.getElementById('chatText').value = '';
+    loadMessages();
+  } else alert('Ошибка отправки');
+}
+
+// escape helper
+function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[m]); }
+
+window.addEventListener('load', loadSession);
+</script>
+
+</body>
+</html>

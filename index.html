@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI Video — Login / Register</title>
+
+<style>
+  /* --- СТИЛЬ: градиенты, 3D кнопки --- */
+  :root{
+    --bg1:#061022; --bg2:#0b1230; --accent1:#7c3aed; --accent2:#06b6d4;
+    --glass: rgba(255,255,255,0.04); --text:#e6eef8;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; font-family:Inter,Arial,sans-serif;
+    background: linear-gradient(135deg,var(--bg1),var(--bg2));
+    display:flex; align-items:center; justify-content:center; color:var(--text);
+    padding:24px;
+  }
+
+  .card{
+    width:360px; max-width:100%; background: rgba(255,255,255,0.03);
+    border-radius:14px; padding:22px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+
+  h1{margin:0 0 10px;font-size:20px;text-align:center}
+  p.lead{margin:0 0 18px;opacity:.85;text-align:center}
+
+  input{width:100%; padding:10px 12px; margin:10px 0; border-radius:10px;
+    border:1px solid rgba(255,255,255,0.04); background: rgba(255,255,255,0.02); color:var(--text);
+    outline:none; font-size:14px;}
+
+  .btn{
+    display:inline-block; width:100%; padding:12px; margin-top:10px;
+    border-radius:12px; border:0; font-weight:700; cursor:pointer;
+    background: linear-gradient(135deg,var(--accent1),var(--accent2));
+    color:white; box-shadow: 0 10px 25px rgba(10,6,30,0.6), 0 4px 8px rgba(0,0,0,0.3) inset;
+    transition: transform .12s ease, box-shadow .12s;
+  }
+  .btn:active{ transform: translateY(3px); box-shadow: 0 6px 18px rgba(0,0,0,0.6); }
+
+  .muted{font-size:13px;opacity:.85;text-align:center;margin-top:12px}
+  .link{color:inherit;text-decoration:underline;cursor:pointer}
+
+  .tiny{font-size:12px; opacity:.9}
+
+  /* small notice */
+  .notice{margin-top:12px;background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;font-size:13px}
+
+  .row { display:flex; gap:8px }
+  .row .half{flex:1}
+
+  footer {margin-top:14px; text-align:center; font-size:12px; opacity:.7}
+
+  /* responsive */
+  @media(max-width:420px){ .card{padding:16px} }
+</style>
+</head>
+<body>
+
+<div class="card" id="root">
+  <h1 id="title">Вход</h1>
+  <p class="lead" id="subtitle">Войдите в свой аккаунт или зарегистрируйтесь</p>
+
+  <div id="formWrap">
+    <input id="username" placeholder="Логин (username или email)" />
+    <input id="password" type="password" placeholder="Пароль" />
+
+    <button class="btn" id="mainBtn">Войти</button>
+
+    
+
+    <p class="muted tiny" style="margin-top:10px">
+      <span id="switchText">Нет аккаунта?</span>
+      <span class="link" id="switchBtn"> Зарегистрироваться</span>
+    </p>
+  </div>
+
+  <footer>AI Video . .</footer>
+</div>
+
+<script>
+/*
+  index.html script
+  - режимы: login / register
+  - POST-запросы к Flask backend ( /login, /register )
+  - после успешного входа редирект -> /panel.html
+*/
+
+const state = { mode: 'login' };
+
+const usernameEl = document.getElementById('username');
+const passwordEl = document.getElementById('password');
+const mainBtn = document.getElementById('mainBtn');
+const switchBtn = document.getElementById('switchBtn');
+const titleEl = document.getElementById('title');
+const subtitle = document.getElementById('subtitle');
+const switchText = document.getElementById('switchText');
+
+switchBtn.onclick = () => {
+  if (state.mode === 'login') {
+    state.mode = 'register';
+    titleEl.textContent = 'Регистрация';
+    subtitle.textContent = 'Создайте новый аккаунт';
+    mainBtn.textContent = 'Зарегистрироваться';
+    switchText.textContent = 'Уже есть аккаунт?';
+    switchBtn.textContent = ' Войти';
+  } else {
+    state.mode = 'login';
+    titleEl.textContent = 'Вход';
+    subtitle.textContent = 'Войдите в свой аккаунт или зарегистрируйтесь';
+    mainBtn.textContent = 'Войти';
+    switchText.textContent = 'Нет аккаунта?';
+    switchBtn.textContent = ' Зарегистрироваться';
+  }
+};
+
+mainBtn.onclick = async () => {
+  const username = usernameEl.value.trim();
+  const password = passwordEl.value;
+
+  if (!username || !password) {
+    alert('Введите логин и пароль');
+    return;
+  }
+
+  if (state.mode === 'login') {
+    try {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ username, password })
+      });
+      const j = await res.json();
+      if (j.success) {
+        // redirect to panel
+        window.location.href = '/panel.html';
+      } else {
+        alert(j.error || 'Неверный логин/пароль');
+      }
+    } catch(e){
+      alert('Ошибка соединения с сервером');
+      console.error(e);
+    }
+  } else {
+    // register
+    try {
+      const res = await fetch('/register', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ username, password })
+      });
+      const j = await res.json();
+      if (j.success) {
+        alert('Регистрация успешна. Вы вошли.');
+        window.location.href = '/panel.html';
+      } else {
+        alert(j.error || 'Ошибка регистрации');
+      }
+    } catch(e){
+      alert('Ошибка соединения с сервером');
+      console.error(e);
+    }
+  }
+};
+
+// submit on Enter
+[usernameEl, passwordEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') mainBtn.click() }));
+</script>
+
+</body>
+</html>

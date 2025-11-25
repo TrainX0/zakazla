@@ -1,0 +1,12 @@
+{
+  "Bobur2012.12": {
+    "password_hash": "scrypt:32768:8:1$Mhn3plYYZWh78Q0N$f50a2b17adc55709f3a017c6fc9561e56958498522fe253c061e5c6600a9cde1c64b6d80ba8ec8c047498acfe76d0931eb57212e113484d390b7bff6f0c23d35",
+    "role": "admin",
+    "created_at": "2025-11-25T07:05:20.879427"
+  },
+  "BoburShuhartov": {
+    "password_hash": "scrypt:32768:8:1$yEntymcpnVPMW62Z$cdd637db569646faae3fe32f92cd443feb8d7a90d4998e0e254e0403ec8d614cab87ede1ed35c01bccc0e10f628d28454a6551a7a844a60b4a264d8a80d9a3f9",
+    "role": "client",
+    "created_at": "2025-11-25T07:06:06.212678"
+  }
+}
